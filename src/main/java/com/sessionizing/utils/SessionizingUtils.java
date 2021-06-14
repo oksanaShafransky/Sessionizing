@@ -64,18 +64,22 @@ public class SessionizingUtils {
         Map<String, List<PageView>> map = dataLoader.getSiteUrlMap().get(siteUrl);
         Set<Session> sessions = new HashSet<>();
         try {
-            map.entrySet().forEach(entry -> {
-                entry.getValue().sort(Comparator.comparing(PageView::getTimestamp));
-                entry.getValue().stream().forEach(pageView -> {
-                    Session session = findSession(pageView, sessions);
-                    if (session != null) {
-                        updateSession(session, pageView);
-                    } else {
-                        addSession(pageView, sessions);
-                    }
+            if(map != null) {
+                map.entrySet().forEach(entry -> {
+                    entry.getValue().sort(Comparator.comparing(PageView::getTimestamp));
+                    entry.getValue().stream().forEach(pageView -> {
+                        Session session = findSession(pageView, sessions);
+                        if (session != null) {
+                            updateSession(session, pageView);
+                        } else {
+                            addSession(pageView, sessions);
+                        }
+                    });
                 });
-            });
-            logger.info("Session data preparation was completed successfully.");
+                logger.info("Session data preparation was completed successfully.");
+            } else {
+                logger.info("No siteUrl "  + siteUrl + " found");
+            }
         } catch (Exception e){
             logger.error("Error on prepareSessionData.", e);
         }
