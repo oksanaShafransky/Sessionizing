@@ -16,7 +16,6 @@ public class SessionController {
     private static Logger logger = Logger.getLogger(SessionController.class);
     @Autowired
     SessionizingUtils sessionazingUtils;
-
     //to get number of session for given siteUrl - run http://localhost:8080/session/numOfSession/{siteUrl}
     @RequestMapping(value = "numOfSessions/{siteUrl}", method = {RequestMethod.GET})
     public @ResponseBody
