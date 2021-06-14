@@ -10,7 +10,6 @@ public class SessionizingApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SessionizingApplication.class, args);
 		loadData();
-
 	}
 
 	public static void loadData(){
