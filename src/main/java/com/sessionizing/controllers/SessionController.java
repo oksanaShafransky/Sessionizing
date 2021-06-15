@@ -16,7 +16,8 @@ public class SessionController {
     private static Logger logger = Logger.getLogger(SessionController.class);
     @Autowired
     SessionizingUtils sessionazingUtils;
-    //to get number of session for given siteUrl - run http://localhost:8080/session/numOfSession/{siteUrl}
+
+    //API to get number of session for given siteUrl - run http://localhost:8080/session/numOfSession/{siteUrl}
     @RequestMapping(value = "numOfSessions/{siteUrl}", method = {RequestMethod.GET})
     public @ResponseBody
     long getNumOfSessions(@PathVariable String siteUrl) {
@@ -26,7 +27,7 @@ public class SessionController {
         return numOfSessions;
     }
 
-    //to get median of sessions length (in seconds) for given siteUrl - run http://localhost:8080/session/medianSessionLength/{siteUrl}
+    //API to get median of sessions length (in seconds) for given siteUrl - run http://localhost:8080/session/medianSessionLength/{siteUrl}
     @RequestMapping(value = "medianSessionLength/{siteUrl}", method = {RequestMethod.GET})
     public @ResponseBody
     double getMedianSessionLength(@PathVariable String siteUrl) {
@@ -36,7 +37,7 @@ public class SessionController {
         return num;
     }
 
-    //to get number of unique visited sites for given visitor id - run http://localhost:8080/session/numOfUniqueVisitedSites/{visitorId}
+    //API to get number of unique visited sites for given visitor id - run http://localhost:8080/session/numOfUniqueVisitedSites/{visitorId}
     @RequestMapping(value = "numOfUniqueVisitedSites/{visitorId}", method = {RequestMethod.GET})
     public @ResponseBody
     long getNumOfUniqueVisitedSites(@PathVariable String visitorId) {

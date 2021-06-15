@@ -15,35 +15,34 @@ Expected to get median of session length for provided site url.
 2. Description of the solution:
 In this solution I used Spring Boot framework to run web application using Apache tomcat server.
 The code is written using Java 8 capabilities.
-On application initialization, DataLoader class loads the data files located under /resources/static folder into Map that clusters the data
-a. By siteUrl
-b. By visitorId
-This kind of data storage enables to get data for specific siteUrl by time complexity O(1), space complexity O(n).
+On application initialization, DataLoader class loads the data files located under /resources/static folder into HashMaps that clusters the data by:
+a. siteUrl
+b. visitorId
+This kind of data storage enables to get data for specific siteUrl by time complexity O(1), space complexity O(n) X 2 (for 2 HashMaps).
 The application uses 2 kind of objects:
 a. PageView  - to describe single page of a site that was visited by a visitor at some timestamp.
 b. Session - object that unites group of page views of a single visitor to a single site such that the time between every two successive page views is not longer than 30 minutes.
 This object contains data for specific site, visitor id, session start, session length, list of PageView related to the specific session.
 
-While running of the APIs defined on SessionizingController class, it invokes one of the methods under SessioningUtils class that provides responce for the API requests.
+SessionizingController class exposes APIs for user. The controller invokes one of the methods under SessioningUtils class that provides responce for the API requests.
 
 3. How the code was tested:
-The code was tested using unit tests, testing each method used by APIs vs expected results under test/java/com/sessioning/SessionizingApplicationTests.java
+The code was tested using unit tests (junit), testing each method used by APIs vs expected results under test/java/com/sessioning/SessionizingApplicationTests.java.
 To run the test, right-click SessionizingApplicationTests.java and select Run SessionizingApplicationTests.
 
 4. Space and time complexity:
 Construction - insert to HashMap O(1) + insert to list O(1), total HashMap construction/loading to memory containing list of PageView is O(n).
-
-Session object construction for specific siteUrl - to get List of all page view is O(1), sort the list by timestamp - O(lLogl). 
-to prepare sessions we need O(l) - l is length of the list.
+Session object construction for specific siteUrl - to get List of all page view is O(1), sort the list by timestamp - O(lLogl) - l is length of the page view list. 
+To prepare sessions we need O(l) - l is length of the list.
 To insert session to the set is O(lLogl).
 Total session preparation O(lLogL).
+Set memory consumption - O(n).
 For median calculation, additionally to session construction, we need to sort the set of sessions by session length with O(sLogs) - s is number of sessions.
-For unique visited sites for visitor id requires O(nLogn) to insert to the set.
-
+For unique visited sites for visitor id requires O(1) to get the page views per specific visitor id, and O(nLogn) to insert to the set - n is number of sites per visitor id.
 
 5. Scale support proposition:
 To provide scale support, the project needs to use streaming (like Kafka), 
 to process the data on going and not to hold it all in memory - preferably on separate service that is in charge of data loading only.
 Then the processed data will be stored in some persistent layer (like db) and would hold in memory only cache of recently used objects (using cache solutions like Redis).
 As well, the application needs to have some load balancer while running on several clusters to be able to contest with big number of concurrent requests getting processed data from shared cache.
-The application can be splitted as well to 2 separate services, one dealing with site url related requests, and the second one related to visitor id requests.
+The application can be splited as well to 2 separate services, one dealing with site url related requests, and the second one related to visitor id requests.

@@ -13,18 +13,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DataLoader {
     private static Logger logger = Logger.getLogger(DataLoader.class);
-    //hash map of key - siteUrl, value - map of key - visitorId, value - list of PageViews
     private Map<String, List<PageView>> siteUrlHashMap = new HashMap();
     private Map<String, List<PageView>> visitorIdHashMap = new HashMap<>();
 
     /**
      * This method load all files from the provided folder into the memory
-     * and parse the data and then adds it to the list of PageView.
+     * and parse the data and then prepare HashMaps for SiteUrl and VisitorId.
+     * siteUrlHashMap - key - siteUrl, value - list of PageView
+     * visitorIdHashMap - key - visitorId, value - list of PageView
      */
     public void loadCSVData() {
         try {

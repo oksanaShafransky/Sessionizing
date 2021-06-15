@@ -24,7 +24,7 @@ public class SessionizingUtils {
     }
 
     //find all session with siteUrl, sort them by session length,
-    //and find the median value of the session length in the middle of the data range.
+    //find the median value of the session length in the middle of the data range.
     //in case number of sessions is even, take mean of two middle values.
     //in case no siteUrl found in the sessions, return -1 (not found).
     public double getMedianSessionLength(String siteUrl){
@@ -50,7 +50,7 @@ public class SessionizingUtils {
 
     /**
      * Prepare session data from the page view list.
-     * If no session found in set of sessions with visitor id, site url and timestamp of prev not linger than 30 min,
+     * If no session found in set of sessions with visitor id, site url and timestamp of prev not longer than 30 min,
      * Create new session with session length = 0.
      * Otherwise, update existing session with new page view and session length.
      */
