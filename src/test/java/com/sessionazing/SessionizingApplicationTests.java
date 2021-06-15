@@ -30,13 +30,13 @@ class SessionizingApplicationTests {
 	@Test
 	public void testNumOfSessionsPerSiteUrl(){
 		long num = sessionizingUtils.getNumOfSessions(siteUrl);
-		long expectedNum = 3113;
+		long expectedNum = 3712;
 		assertEquals("testNumOfSessionsPerSiteUrl expected num = " + expectedNum, expectedNum, num);
 	}
 	@Test
 	public void testMedianOfSessionLengthPerSiteUrl(){
 		double num = sessionizingUtils.getMedianSessionLength(siteUrl);
-		double expectedNum = 2038;
+		double expectedNum = 1374;
 		assertEquals("testNumOfSessionsPerSiteUrl expected num = " + expectedNum, expectedNum, num);
 	}
 

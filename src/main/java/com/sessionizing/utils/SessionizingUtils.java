@@ -20,7 +20,7 @@ public class SessionizingUtils {
     //find all sessions with siteUrl and count them.
     public long getNumOfSessions(String siteUrl){
         Set<Session> sessions = prepareSessionDataBySiteUrl(siteUrl);
-        return sessions.stream().count();
+        return sessions.size();
     }
 
     //find all session with siteUrl, sort them by session length,
@@ -30,10 +30,10 @@ public class SessionizingUtils {
     public double getMedianSessionLength(String siteUrl){
         List<Session> sessions = prepareSessionDataBySiteUrl(siteUrl).stream().collect(Collectors.toList());
         if(sessions != null && sessions.size() > 0) {
-            sessions.stream().sorted(Comparator.comparing(Session::getSessionLength));
-            int medianIndex = sessions.size() / 2;
+            sortBySessionLength(sessions);
+            int medianIndex = (sessions.size() - 1) / 2;
             return sessions.size() % 2 == 0 ?
-                    (sessions.get(medianIndex).getSessionLength() + sessions.get(medianIndex + 1).getSessionLength()) / 2 :
+                    (double)(sessions.get(medianIndex).getSessionLength() + sessions.get(medianIndex + 1).getSessionLength()) / 2 :
                     sessions.get(medianIndex).getSessionLength();
         }
         //not found
@@ -42,7 +42,6 @@ public class SessionizingUtils {
 
     //calc number of visited sites for visitor id without duplication
     public long getNumOfUniqueVisitedSites(String visitorId) {
-        Set<String> pages = new HashSet<>();
         List<PageView> pageViewsList = dataLoader.getVisitorIdMap().get(visitorId);
         Set<String> uniqueSiteOfVisitor = pageViewsList.stream().map(PageView::getSiteUrl).collect(Collectors.toSet());
         return uniqueSiteOfVisitor.size();
@@ -56,7 +55,7 @@ public class SessionizingUtils {
      */
     public Set<Session> prepareSessionDataBySiteUrl(String siteUrl) {
         List<PageView> pageViewList = dataLoader.getSiteUrlMap().get(siteUrl);
-        pageViewList.sort(Comparator.comparing(PageView::getTimestamp));
+        sortPageViews(pageViewList);
         Set<Session> sessions = new HashSet<>();
         try {
             if(pageViewList != null && !pageViewList.isEmpty()) {
@@ -83,32 +82,49 @@ public class SessionizingUtils {
         session.setVisitorId(page.getVisitorId());
         session.setSiteUrl(page.getSiteUrl());
         session.setSessionStart(page.getTimestamp());
-        List<PageView> pageViews = new ArrayList<>();
-        pageViews.add(page);
-        session.setPageViewList(pageViews);
         session.setSessionLength(0);
-        session.setPageViewCount(1);
+        session.setSessionLastPageTimestamp(page.getTimestamp());
         sessions.add(session);
     }
 
     private void updateSession(Session session, PageView page) {
         session.setSessionLastPageTimestamp(page.getTimestamp());
-        session.getPageViewList().add(page);
-        session.setSessionLength(session.getSessionLastPageTimestamp() - session.getSessionStart());
-        session.setPageViewCount(session.getPageViewCount()+1);
+        session.setSessionLength(page.getTimestamp() - session.getSessionStart());
     }
 
     private Session findSession(PageView pageView, Set<Session> sessions){
         AtomicReference<Session> session = new AtomicReference<>();
         sessions.stream().forEach(entry -> {
-            if (entry.getVisitorId().equals(pageView.getVisitorId()) &&
+            if (    entry.getVisitorId().equals(pageView.getVisitorId()) &&
                     entry.getSiteUrl().equals(pageView.getSiteUrl()) &&
-                    pageView.getTimestamp() <= (entry.getSessionStart() + SessionizingConstants.HALF_HOUR)) {
+                    (pageView.getTimestamp() - entry.getSessionLastPageTimestamp()) <= SessionizingConstants.HALF_HOUR) {
                 session.set(entry);
                 return;
             }
         });
         return session.get();
+    }
+
+    public void sortPageViews(List<PageView> pageViews) {
+        if(pageViews!=null && !pageViews.isEmpty()) {
+            Collections.sort(pageViews, new Comparator<PageView>() {
+                @Override
+                public int compare(PageView o1, PageView o2) {
+                    return (int) (o1.getTimestamp() - o2.getTimestamp());
+                }
+            });
+        }
+    }
+
+    public void sortBySessionLength(List<Session> sessions) {
+        if(sessions!=null && !sessions.isEmpty()) {
+            Collections.sort(sessions, new Comparator<Session>() {
+                @Override
+                public int compare(Session o1, Session o2) {
+                    return (int) (o1.getSessionLength() - o2.getSessionLength());
+                }
+            });
+        }
     }
 
 }

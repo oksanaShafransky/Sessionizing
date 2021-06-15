@@ -23,8 +23,10 @@ The application uses 2 kind of objects:
 a. PageView  - to describe single page of a site that was visited by a visitor at some timestamp.
 b. Session - object that unites group of page views of a single visitor to a single site such that the time between every two successive page views is not longer than 30 minutes.
 This object contains data for specific site, visitor id, session start, session length, list of PageView related to the specific session.
-
 SessionizingController class exposes APIs for user. The controller invokes one of the methods under SessioningUtils class that provides responce for the API requests.
+
+* I could prepare the sessions in advance on data loading, but since session nature is dynamic and is changing all the time during streaming,
+* I thought that it is more reasonable to calculate it on runtime upon request.
 
 3. How the code was tested:
 The code was tested using unit tests (junit), testing each method used by APIs vs expected results under test/java/com/sessioning/SessionizingApplicationTests.java.

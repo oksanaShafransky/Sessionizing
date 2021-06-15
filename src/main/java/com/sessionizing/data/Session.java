@@ -17,6 +17,4 @@ public class Session {
     long sessionStart;
     long sessionLastPageTimestamp;
     long sessionLength;
-    List<PageView> pageViewList;
-    int pageViewCount;
 }
