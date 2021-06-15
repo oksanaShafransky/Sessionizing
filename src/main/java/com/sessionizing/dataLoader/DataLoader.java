@@ -19,7 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataLoader {
     private static Logger logger = Logger.getLogger(DataLoader.class);
     //hash map of key - siteUrl, value - map of key - visitorId, value - list of PageViews
-    private ConcurrentHashMap<String, HashMap<String, List<PageView>>> siteUrlHashMap = new ConcurrentHashMap();
+    private Map<String, List<PageView>> siteUrlHashMap = new HashMap();
+    private Map<String, List<PageView>> visitorIdHashMap = new HashMap<>();
 
     /**
      * This method load all files from the provided folder into the memory
@@ -39,6 +40,8 @@ public class DataLoader {
                         if (pageView != null) {
                             //update hashMap for siteUrl
                             updateSiteUrlHashMap(pageView);
+                            //update hashMap for visitorId
+                            updateVisitorIdHashMap(pageView);
                         }
                     }
                 }
@@ -75,26 +78,31 @@ public class DataLoader {
     }
 
     private void updateSiteUrlHashMap(PageView pageView){
-        HashMap<String, List<PageView>> siteUrlEntry = siteUrlHashMap.get(pageView.getSiteUrl());
+        List<PageView> siteUrlEntry = siteUrlHashMap.get(pageView.getSiteUrl());
         if(siteUrlEntry == null) {
-            Map<String, List<PageView>> visitorIdMap = new HashMap<>();
             List<PageView> pageViews = new ArrayList<>();
             pageViews.add(pageView);
-            visitorIdMap.put(pageView.getVisitorId(), pageViews);
-            siteUrlHashMap.put(pageView.getSiteUrl(), (HashMap<String, List<PageView>>) visitorIdMap);
+            siteUrlHashMap.put(pageView.getSiteUrl(), pageViews);
         } else {
-            List<PageView> visitorIdEntry = siteUrlEntry.get(pageView.getVisitorId());
-            if(visitorIdEntry == null){
-                visitorIdEntry = new ArrayList<>();
-                visitorIdEntry.add(pageView);
-                siteUrlEntry.put(pageView.getVisitorId(), visitorIdEntry);
-            } else {
-                visitorIdEntry.add(pageView);
-            }
+            siteUrlEntry.add(pageView);
         }
     }
 
-    public ConcurrentHashMap<String, HashMap<String, List<PageView>>> getSiteUrlMap(){
+    private void updateVisitorIdHashMap(PageView pageView){
+        List<PageView> visitorIdEntry = visitorIdHashMap.get(pageView.getVisitorId());
+        if(visitorIdEntry == null) {
+            List<PageView> pageViews = new ArrayList<>();
+            pageViews.add(pageView);
+            visitorIdHashMap.put(pageView.getVisitorId(), pageViews);
+        } else {
+            visitorIdEntry.add(pageView);
+        }
+    }
+
+    public Map<String, List<PageView>> getSiteUrlMap(){
         return siteUrlHashMap;
+    }
+    public Map<String, List<PageView>> getVisitorIdMap(){
+        return visitorIdHashMap;
     }
 }

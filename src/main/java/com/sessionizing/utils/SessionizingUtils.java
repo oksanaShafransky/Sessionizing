@@ -43,15 +43,9 @@ public class SessionizingUtils {
     //calc number of visited sites for visitor id without duplication
     public long getNumOfUniqueVisitedSites(String visitorId) {
         Set<String> pages = new HashSet<>();
-        dataLoader.getSiteUrlMap().entrySet().stream().forEach(entry -> {
-            List<PageView> pageViews = entry.getValue().get(visitorId);
-            if(pageViews != null && pageViews.size() > 0) {
-                Set<String> uniqueSiteOfVisitor = pageViews.stream().map(PageView::getSiteUrl).collect(Collectors.toSet());
-                pages.addAll(uniqueSiteOfVisitor);
-            }
-        });
-
-        return pages.size();
+        List<PageView> pageViewsList = dataLoader.getVisitorIdMap().get(visitorId);
+        Set<String> uniqueSiteOfVisitor = pageViewsList.stream().map(PageView::getSiteUrl).collect(Collectors.toSet());
+        return uniqueSiteOfVisitor.size();
     }
 
     /**
@@ -61,20 +55,18 @@ public class SessionizingUtils {
      * Otherwise, update existing session with new page view and session length.
      */
     public Set<Session> prepareSessionDataBySiteUrl(String siteUrl) {
-        Map<String, List<PageView>> map = dataLoader.getSiteUrlMap().get(siteUrl);
+        List<PageView> pageViewList = dataLoader.getSiteUrlMap().get(siteUrl);
+        pageViewList.sort(Comparator.comparing(PageView::getTimestamp));
         Set<Session> sessions = new HashSet<>();
         try {
-            if(map != null) {
-                map.entrySet().forEach(entry -> {
-                    entry.getValue().sort(Comparator.comparing(PageView::getTimestamp));
-                    entry.getValue().stream().forEach(pageView -> {
+            if(pageViewList != null && !pageViewList.isEmpty()) {
+                 pageViewList.stream().forEach(pageView -> {
                         Session session = findSession(pageView, sessions);
                         if (session != null) {
                             updateSession(session, pageView);
                         } else {
                             addSession(pageView, sessions);
                         }
-                    });
                 });
                 logger.info("Session data preparation was completed successfully.");
             } else {
